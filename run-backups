@@ -6,8 +6,11 @@ while true; do
   ts=$(date -Iseconds)
   archive="/backups/${PREFIX}-${ts}.archive"
 
-  mongodump --archive="${archive}" "$@"
-  echo "Created backup: ${archive}"
+  if mongodump --host=${HOST} --archive="${archive}" "$@"; then
+    echo "Created backup: ${archive}"
+  else
+    echo "ERROR ($?) : failed to create backup"
+  fi
 
   sleep ${INTERVAL}
 done
