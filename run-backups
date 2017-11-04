@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "Backups: host=${HOST} prefix=${PREFIX}, interval=${INTERVAL}"
+
+while true; do
+  ts=$(date -Iseconds)
+  archive="/backups/${PREFIX}-${ts}.archive"
+
+  mongodump --archive="${archive}" "$@"
+  echo "Created backup: ${archive}"
+
+  sleep ${INTERVAL}
+done
