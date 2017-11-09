@@ -7,7 +7,24 @@ while true; do
   archive="/backups/${PREFIX}-${ts}.archive"
 
   if mongodump --host=${HOST} --archive="${archive}" "$@"; then
-    echo "Created backup: ${archive}"
+    if [ -f $archive ]; then
+      echo "Created backup: ${archive}"
+
+      if [ x$RCLONE_CONFIG != x -a x$RCLONE_REMOTE_PATH != x -a -f $RCLONE_CONFIG ]; then
+        echo "Using rclone to backup to $RCLONE_REMOTE_PATH"
+        rclone --config $RCLONE_CONFIG copy /backups $RCLONE_REMOTE_PATH
+        if [ x$RCLONE_LOCAL_KEEP != x ]; then
+          echo "Processing local files to keep for $RCLONE_LOCAL_KEEP"
+          rclone --config $RCLONE_CONFIG --min-age $RCLONE_LOCAL_KEEP delete /backups
+        fi
+        if [ x$RCLONE_REMOTE_KEEP != x ]; then
+          echo "Processing remote files to keep for $RCLONE_REMOTE_KEEP"
+          rclone --config $RCLONE_CONFIG --min-age $RCLONE_REMOTE_KEEP delete $RCLONE_REMOTE_PATH
+        fi
+      fi
+    else
+      echo "ERROR: failed to create backup $archive"
+    fi
   else
     echo "ERROR ($?) : failed to create backup"
   fi
