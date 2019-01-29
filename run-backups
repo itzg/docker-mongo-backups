@@ -2,20 +2,23 @@
 
 echo "Backups: host=${HOST} prefix=${PREFIX}, interval=${INTERVAL}"
 
+backups="/backups"
+
 while true; do
   ts=$(date -Iseconds)
-  archive="/backups/${PREFIX}-${ts}.archive"
+  archive="${backups}/${PREFIX}-${ts}"
 
-  if mongodump --host=${HOST} --archive="${archive}" "$@"; then
-    if [ -f $archive ]; then
-      echo "Created backup: ${archive}"
+  if mongodump --host=${HOST} --out "${archive}" "$@"; then
+    if [ -d ${archive} ]; then
+      tar -C ${archive} -c -f ${archive}.tgz . && rm -rf ${archive}
+      echo "Created backup: ${archive}.tgz"
 
       if [ x$RCLONE_CONFIG != x -a x$RCLONE_REMOTE_PATH != x -a -f $RCLONE_CONFIG ]; then
         echo "Using rclone to backup to $RCLONE_REMOTE_PATH"
-        rclone --config $RCLONE_CONFIG copy /backups $RCLONE_REMOTE_PATH
+        rclone --config $RCLONE_CONFIG copy ${backups} $RCLONE_REMOTE_PATH
         if [ x$RCLONE_LOCAL_KEEP != x ]; then
           echo "Processing local files to keep for $RCLONE_LOCAL_KEEP"
-          rclone --config $RCLONE_CONFIG --min-age $RCLONE_LOCAL_KEEP delete /backups
+          rclone --config $RCLONE_CONFIG --min-age $RCLONE_LOCAL_KEEP delete ${backups}
         fi
         if [ x$RCLONE_REMOTE_KEEP != x ]; then
           echo "Processing remote files to keep for $RCLONE_REMOTE_KEEP"
@@ -29,5 +32,9 @@ while true; do
     echo "ERROR ($?) : failed to create backup"
   fi
 
-  sleep ${INTERVAL}
+  if [ ${INTERVAL} -gt 0 ]; then
+    sleep ${INTERVAL}
+  else
+    break
+  fi
 done
