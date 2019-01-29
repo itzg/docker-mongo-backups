@@ -1,3 +1,5 @@
+[![](https://img.shields.io/docker/automated/itzg/mongo-backups.svg)](https://hub.docker.com/r/itzg/mongo-backups)
+
 This is a very simplistic container to perform periodic backups of an adjacent mongo container.
 
 ## Environment Variables
