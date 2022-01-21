@@ -1,8 +1,16 @@
-FROM mongo:4
+FROM ubuntu:20.04
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y unzip && \
-    apt-get clean
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y \
+    unzip \
+    && apt-get clean
+
+
+ARG MONGODB_TOOLS_VERSION=100.5.1
+ADD https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-x86_64-${MONGODB_TOOLS_VERSION}.deb /tmp/mongodb-database-tools.deb
+RUN apt install -y /tmp/mongodb-database-tools.deb && \
+    rm /tmp/mongodb-database-tools.deb
 
 ADD https://downloads.rclone.org/rclone-current-linux-amd64.zip /tmp/rclone.zip
 
