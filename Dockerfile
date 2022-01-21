@@ -1,4 +1,4 @@
-FROM mongo:3.6
+FROM mongo:4
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y unzip && \
