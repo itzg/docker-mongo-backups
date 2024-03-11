@@ -33,7 +33,7 @@ jobs:
             latest=${{ github.ref_name == 'master' }}
 
       - name: Image build and push
-        uses: docker/build-push-action@v5.1.0
+        uses: docker/build-push-action@v5.2.0
         with:
           context: .
           platforms: linux/amd64
